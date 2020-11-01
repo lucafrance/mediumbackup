@@ -1,4 +1,4 @@
-import medium_backup
+import mediumbackup
 import argparse
 
 if __name__ == "__main__":
@@ -8,6 +8,6 @@ if __name__ == "__main__":
     parser.add_argument("--format", "--f", help="\"html\" or \"md\" for markdown")
     
     arguments = parser.parse_args()
-    medium_backup.backup_stories(arguments.username, backup_dir=arguments.backup_dir, format=arguments.format)
+    mediumbackup.backup_stories(arguments.username, backup_dir=arguments.backup_dir, format=arguments.format)
     
     

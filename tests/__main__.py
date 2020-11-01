@@ -3,7 +3,7 @@ import filecmp
 import os
 import shutil
 
-import medium_backup
+import mediumbackup
 
 TEST_BACKUP_DIR = os.path.join("tests","backup")
 REFERENCE_STORY_NAME = "2020-10-05 come-aggiungere-i-caratteri-ma"
