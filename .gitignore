@@ -4,3 +4,7 @@ venv/
 # Jupyter notebook
 .ipynb_checkpoints
 *.ipynb
+
+# Tests
+__pycache__
+tests/__pycache__/
