@@ -24,6 +24,9 @@ def backup_stories(username, backup_dir = "backup"):
         content = md(content, heading_style="ATX")
         
         url_path = link.split("/")[-1]
+        # Remove invalid filename charachters
+        for char in "?":
+            url_path = url_path.replace(char, "")
         filename = "".join([pub_date, " ", url_path[:MAX_FILENAME_LENGTH], ".md"])
         
         with open(os.path.join(backup_dir, filename), "wt", encoding="utf8") as f:
