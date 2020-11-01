@@ -6,15 +6,17 @@ from markdownify import markdownify as md
 
 MAX_FILENAME_LENGTH = 30 # Ignores date and extension, e.g. 2020-10-31<-- 30 characthers -->.md
 
-def backup_stories(username, backup_dir="backup", format="html"):
+def backup_stories(username, backup_dir=None, format=None):
     """ Download all the public stories by username.
     
     Keyword arguments:
-    backup_dir -- the folder where to save files
-    format     -- "html" or "md" for markdown
+    backup_dir -- destination directory name, default "backup"
+    format     -- "html" or "md" for markdown, defualt "html"
     """
     
     # Check user input
+    backup_dir = "backup" if backup_dir is None else backup_dir
+    format = "html" if format is None else format
     if format not in ["html", "md"]:
         logging.warning("Format {} note recognized, html will be used instead.".format(format))
         
@@ -54,6 +56,4 @@ def backup_stories(username, backup_dir="backup", format="html"):
             f.write(content)
     return
     
-
-if __name__ == "__main__":
-    pass
+    
