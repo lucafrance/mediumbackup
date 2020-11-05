@@ -42,6 +42,14 @@ def backup_stories(username, backup_dir=None, format=None, download_images=False
         link = story["link"]
         content = story["content"]
         
+        # Remove placeholder images for stats
+        # They are used to count views from e.g. rss feeds
+        soup = bs(content, "html.parser")
+        for img in soup.find_all("img"):
+            if img["src"].startswith("https://medium.com/_/stat"):
+                img.decompose()
+        content = str(soup)    
+            
         # If requested, download all images
         if download_images:
             
@@ -53,10 +61,6 @@ def backup_stories(username, backup_dir=None, format=None, download_images=False
             img_sources = [img["src"] for img in soup.find_all("img")]
             
             for img_src in img_sources:
-                
-                # Ignore placeholder images for stats
-                if img_src.startswith("https://medium.com/_/stat"):
-                    continue
                 
                 # Download the image
                 r = requests.get(img_src)
@@ -84,9 +88,17 @@ def backup_stories(username, backup_dir=None, format=None, download_images=False
         
         # Add story title to the content
         content = "<h1>{}</h1>{}".format(title, content)
-        if format == "md":
-            content = md(content, heading_style="ATX")
         
+        # Markdown
+        if format == "md":
+            
+            # Add an two new lines after figures to ensure that when a header
+            # follows a figure it starts on a new line in markdown
+            content = content.replace("</figure>", "</figure><br><br>")
+            
+            # Convert to markdown
+            content = md(content, heading_style="ATX")
+            
         # Find the url path portion of the story url 
         # (i.e. whatever comes after the last /)
         # and remove invalid filename characthers
