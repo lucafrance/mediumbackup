@@ -92,9 +92,11 @@ def backup_stories(username, backup_dir=None, format=None, download_images=False
         # Markdown
         if format == "md":
             
-            # Add an two new lines after figures to ensure that when a header
-            # follows a figure it starts on a new line in markdown
-            content = content.replace("</figure>", "</figure><br><br>")
+            # Add two new lines after figures and blockquotes 
+            # to prevent formatting errors with markdown
+            # https://github.com/matthewwithanm/python-markdownify/pull/25
+            for closing_tag in ["</figure>", "</blockquote>"]:
+                content = content.replace(closing_tag, closing_tag + "<br><br>")
             
             # Convert to markdown
             content = md(content, heading_style="ATX")
