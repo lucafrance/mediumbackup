@@ -103,8 +103,14 @@ def backup_stories(username, backup_dir=None, format=None, download_images=False
             # https://github.com/matthewwithanm/python-markdownify/pull/23
             content = content.replace("\n<li>", "<li>")
             
+            # Workaround for <pre> tags not being converted
+            content = content.replace("<pre>", "<pre>```").replace("</pre>", "```</pre>")
+            
             # Convert to markdown
             content = md(content, heading_style="ATX")
+            
+            # Ensure that "```" stays on its own line
+            content = content.replace("```", "\n```\n")
             
         # Find the url path portion of the story url 
         # (i.e. whatever comes after the last /)
