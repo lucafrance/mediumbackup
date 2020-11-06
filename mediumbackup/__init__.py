@@ -98,6 +98,11 @@ def backup_stories(username, backup_dir=None, format=None, download_images=False
             for closing_tag in ["</figure>", "</blockquote>"]:
                 content = content.replace(closing_tag, closing_tag + "<br><br>")
             
+            # Workaround for ordered lists in markdownify
+            # https://github.com/matthewwithanm/python-markdownify/issues/8
+            # https://github.com/matthewwithanm/python-markdownify/pull/23
+            content = content.replace("\n<li>", "<li>")
+            
             # Convert to markdown
             content = md(content, heading_style="ATX")
             
