@@ -9,6 +9,9 @@ import requests
 MAX_FILENAME_LENGTH = 30 # Ignores date and extension, e.g. 2020-10-31<-- 30 characthers -->.md
 FORBIDDEN_FILENAME_CHARS = "*?"
 
+DEFAULT_BACKUP_DIR = "backup"
+DEFAULT_FORMAT = "html"
+
 class MediumStory():
     
     def __init__(self, raw):
@@ -81,7 +84,7 @@ class MediumStory():
     def markdown(self):
         
         if self._markdown is not None:
-            return _markdown
+            return self._markdown
         
         html = self.html()
         # Add two new lines after figures and blockquotes 
@@ -107,7 +110,7 @@ class MediumStory():
         self._markdown = md_story
         return self._markdown
         
-    def backup(self, backup_dir=None, format=None, download_images=False):
+    def backup(self, backup_dir, format, download_images=False):
         """ Download the story locally.
         
         Keyword arguments:
@@ -119,8 +122,6 @@ class MediumStory():
         logging.info("Downloading story \"{}\" published on \"{}\".".format(self.title, self.pub_date))
         
         # Check user input
-        backup_dir = "backup" if backup_dir is None else backup_dir
-        format = "html" if format is None else format
         if format not in ["html", "md"]:
             logging.warning("Format {} not recognized, html will be used instead.".format(format))
         
@@ -155,7 +156,7 @@ class MediumStory():
         
         return
         
-def backup_stories(username, backup_dir=None, format=None, download_images=False):
+def backup_stories(username, backup_dir=DEFAULT_BACKUP_DIR, format=DEFAULT_FORMAT, download_images=False):
     """ Download all public stories by username. """
     
     # Get the stories list through a medium client, 
