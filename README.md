@@ -30,3 +30,9 @@ Save as markdown.
 ``` 
 python -m mediumbackup --format "md"
 ```
+
+## Tests
+To run the tests, execute:
+```
+python -m tests
+```

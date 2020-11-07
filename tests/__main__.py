@@ -5,20 +5,19 @@ import shutil
 
 import mediumbackup as mb
 
-TEST_BACKUP_DIR = os.path.join("tests","backup")
-REFERENCE_STORY_NAME = "2020-10-05 come-aggiungere-i-caratteri-ma"
 
 class MediumStoriesTest(unittest.TestCase):
     
-    def test_story(self):
+    def test_backup_stories_wo_images(self):
+        test_backup_dir = os.path.join("tests","backup")
         for format in ("html", "md"):
-            mb.backup_stories(username="lucafrance", backup_dir=TEST_BACKUP_DIR, format=format)
+            mb.backup_stories(username="lucafrance", backup_dir=test_backup_dir, format=format)
             file_extension = "." + format
-            test_file = os.path.join(TEST_BACKUP_DIR, REFERENCE_STORY_NAME) + file_extension
-            reference_file = os.path.join("tests", REFERENCE_STORY_NAME) + file_extension
+            reference_story_name = "2020-10-05 come-aggiungere-i-caratteri-ma"
+            test_file = os.path.join(test_backup_dir, reference_story_name) + file_extension
+            reference_file = os.path.join("tests", reference_story_name) + file_extension
             self.assertTrue(os.path.exists(test_file))
-            self.assertTrue(filecmp.cmp(test_file, reference_file, shallow=False))
-        shutil.rmtree(TEST_BACKUP_DIR)
+        shutil.rmtree(test_backup_dir)
         return
         
         
