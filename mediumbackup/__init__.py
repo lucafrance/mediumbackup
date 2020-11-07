@@ -9,24 +9,154 @@ import requests
 MAX_FILENAME_LENGTH = 30 # Ignores date and extension, e.g. 2020-10-31<-- 30 characthers -->.md
 FORBIDDEN_FILENAME_CHARS = "*?"
 
-def backup_stories(username, backup_dir=None, format=None, download_images=False):
-    """ Download all the public stories by username.
+class MediumStory():
     
-    Keyword arguments:
-    backup_dir      -- destination directory name, default "backup"
-    format          -- "html" or "md" for markdown, defualt "html"
-    download_images -- True to download images and adjust the source, default False
-    """
+    def __init__(self, raw):
+        self.raw = raw
+        self.pub_date = raw["pubDate"][:len("yyyy-mm-dd")]
+        self.title = raw["title"]
+        self.link = raw["link"]
+        self.content = raw["content"]
+        self._html = None
+        self._markdown = None
     
-    # Check user input
-    backup_dir = "backup" if backup_dir is None else backup_dir
-    format = "html" if format is None else format
-    if format not in ["html", "md"]:
-        logging.warning("Format {} not recognized, html will be used instead.".format(format))
+    def html(self):
         
-    # Create backup directroy if not existent
-    if not os.path.exists(backup_dir):
-        os.mkdir(backup_dir)
+        if self._html is not None:
+            return self._html
+        
+        # Add story title to the content
+        html = "<h1>{}</h1>{}".format(self.title, self.content)
+        
+        # Remove placeholder images for stats
+        # They are used to count views from e.g. rss feeds
+        soup = bs(html, "html.parser")
+        for img in soup.find_all("img"):
+            if img["src"].startswith("https://medium.com/_/stat"):
+                img.decompose()
+        html = str(soup)    
+        
+        self._html = html
+        return self._html
+    
+    def download_images(self, images_dir, backup_dir):
+        """Download images and update the html to use the local images as source.
+        """
+        
+        # If the folder doesn't exist yet, create it
+        if not os.path.isdir(os.path.join(backup_dir, images_dir)):
+            os.mkdir(os.path.join(backup_dir, images_dir))
+            
+        # Parse the html source for all images
+        html = self.html()
+        soup = bs(html, "html.parser")
+        img_sources = [img["src"] for img in soup.find_all("img")]
+        
+        # For each image, download it and update the html source
+        for img_src in img_sources:
+            
+            # Build the filename of the image
+            filename = img_src.split("/")[-1]
+            for char in FORBIDDEN_FILENAME_CHARS:
+                filename = filename.replace(char, "")
+            
+            # Download the image
+            r = requests.get(img_src)
+                    
+            # Save the image
+            file_path = os.path.join(backup_dir, images_dir, filename)
+            with open(file_path, "wb") as f:
+                f.write(r.content)
+                logging.info("Downloaded \"{}\" to \"{}\".".format(img_src, file_path))
+                
+            #Replace src attributes to point to the downloaded image
+            new_src = "/".join((images_dir, filename))
+            html = html.replace("src=\"" + img_src  + "\"",
+            "src=\"" + new_src + "\"")        
+        
+        # Update html paramter with local sources paths
+        self._html = html
+        return
+        
+    def markdown(self):
+        
+        if self._markdown is not None:
+            return _markdown
+        
+        html = self.html()
+        # Add two new lines after figures and blockquotes 
+        # to prevent formatting errors with markdown
+        # https://github.com/matthewwithanm/python-markdownify/pull/25
+        for closing_tag in ["</figure>", "</blockquote>"]:
+            html = html.replace(closing_tag, closing_tag + "<br><br>")
+        
+        # Workaround for ordered lists in markdownify
+        # https://github.com/matthewwithanm/python-markdownify/issues/8
+        # https://github.com/matthewwithanm/python-markdownify/pull/23
+        html = html.replace("\n<li>", "<li>")
+        
+        # Workaround for <pre> tags not being converted
+        html = html.replace("<pre>", "<pre>```").replace("</pre>", "```</pre>")
+        
+        # Convert to markdown
+        md_story = md(html, heading_style="ATX")
+        
+        # Ensure that "```" stays on its own line
+        md_story = md_story.replace("```", "\n```\n")
+        
+        self._markdown = md_story
+        return self._markdown
+        
+    def backup(self, backup_dir=None, format=None, download_images=False):
+        """ Download the story locally.
+        
+        Keyword arguments:
+        backup_dir      -- destination directory name, default "backup"
+        format          -- "html" or "md" for markdown, default "html"
+        download_images -- True to download images and adjust the source, default False
+        """
+        
+        logging.info("Downloading story \"{}\" published on \"{}\".".format(self.title, self.pub_date))
+        
+        # Check user input
+        backup_dir = "backup" if backup_dir is None else backup_dir
+        format = "html" if format is None else format
+        if format not in ["html", "md"]:
+            logging.warning("Format {} not recognized, html will be used instead.".format(format))
+        
+        # Create backup directroy if not existent
+        if not os.path.exists(backup_dir):
+            os.mkdir(backup_dir)
+        
+        # Downloaf images if necessary
+        if download_images:
+            images_dir = "images"
+            self.download_images(images_dir, backup_dir)
+        
+        # Get the content formatted correctly
+        if format == "md":
+            content = self.markdown()
+        else:
+            # html is the deault option
+            content = self.html()
+        
+        # Find the url path portion of the story url 
+        # (i.e. whatever comes after the last /)
+        # and remove invalid filename characthers
+        url_path = self.link.split("/")[-1]
+        for char in FORBIDDEN_FILENAME_CHARS:
+            url_path = url_path.replace(char, "")
+            
+        # Build the filename and save the file
+        filename = "".join([self.pub_date, " ", url_path[:MAX_FILENAME_LENGTH], ".", format])
+        with open(os.path.join(backup_dir, filename), "wt", encoding="utf8") as f:
+            f.write(content)
+        logging.info("Story \"{}\" downloaded to \"{}\".".format(self.title, filename))
+        
+        return
+        
+def backup_stories(username, backup_dir=None, format=None, download_images=False):
+    """ Download all public stories by username. """
     
     # Get the stories list through a medium client, 
     # authentication is not required in this case 
@@ -34,95 +164,10 @@ def backup_stories(username, backup_dir=None, format=None, download_images=False
     list_stories = mclient.list_articles(username=username)
     
     # For each story, crate a backup file
-    for story in list_stories:
-        
-        # Retrieve story information
-        pub_date = story["pubDate"][:len("yyyy-mm-dd")]
-        title = story["title"]
-        link = story["link"]
-        content = story["content"]
-        
-        # Remove placeholder images for stats
-        # They are used to count views from e.g. rss feeds
-        soup = bs(content, "html.parser")
-        for img in soup.find_all("img"):
-            if img["src"].startswith("https://medium.com/_/stat"):
-                img.decompose()
-        content = str(soup)    
-            
-        # If requested, download all images
-        if download_images:
-            
-            images_dir = "images"
-            if not os.path.isdir(os.path.join(backup_dir, images_dir)):
-                os.mkdir(os.path.join(backup_dir,images_dir))
-            
-            soup = bs(content, "html.parser")
-            img_sources = [img["src"] for img in soup.find_all("img")]
-            
-            for img_src in img_sources:
-                
-                # Download the image
-                r = requests.get(img_src)
-                
-                #Build the filename of the image
-                filename = img_src.split("/")[-1]
-                for char in FORBIDDEN_FILENAME_CHARS:
-                    filename = filename.replace(char, "")
-                # Content type is e.g. "image/gif"
-                img_suffix = "." + r.headers["Content-Type"].split("/")[-1]
-                # Add the suffix if necessary, some redirect urls do not include it
-                if not filename.endswith(img_suffix):
-                    filename += img_suffix
-                
-                # Save the image
-                file_path = os.path.join(backup_dir, images_dir, filename)
-                with open(file_path, "wb") as f:
-                    f.write(r.content)
-                    logging.info("Downloaded \"{}\" to \"{}\".".format(img_src, file_path))
-                
-                #Replace src attributes to point to the downloaded image
-                new_src = "/".join((images_dir, filename))
-                content = content.replace("src=\"" + img_src  + "\"",
-                                          "src=\"" + new_src + "\"")        
-        
-        # Add story title to the content
-        content = "<h1>{}</h1>{}".format(title, content)
-        
-        # Markdown
-        if format == "md":
-            
-            # Add two new lines after figures and blockquotes 
-            # to prevent formatting errors with markdown
-            # https://github.com/matthewwithanm/python-markdownify/pull/25
-            for closing_tag in ["</figure>", "</blockquote>"]:
-                content = content.replace(closing_tag, closing_tag + "<br><br>")
-            
-            # Workaround for ordered lists in markdownify
-            # https://github.com/matthewwithanm/python-markdownify/issues/8
-            # https://github.com/matthewwithanm/python-markdownify/pull/23
-            content = content.replace("\n<li>", "<li>")
-            
-            # Workaround for <pre> tags not being converted
-            content = content.replace("<pre>", "<pre>```").replace("</pre>", "```</pre>")
-            
-            # Convert to markdown
-            content = md(content, heading_style="ATX")
-            
-            # Ensure that "```" stays on its own line
-            content = content.replace("```", "\n```\n")
-            
-        # Find the url path portion of the story url 
-        # (i.e. whatever comes after the last /)
-        # and remove invalid filename characthers
-        url_path = link.split("/")[-1]
-        for char in FORBIDDEN_FILENAME_CHARS:
-            url_path = url_path.replace(char, "")
-        
-        # Build the filename and save the file
-        filename = "".join([pub_date, " ", url_path[:MAX_FILENAME_LENGTH], ".", format])
-        with open(os.path.join(backup_dir, filename), "wt", encoding="utf8") as f:
-            f.write(content)
+    for story_raw in list_stories:
+        story = MediumStory(story_raw)
+        story.backup(backup_dir, format, download_images)
+    
     return
     
     
