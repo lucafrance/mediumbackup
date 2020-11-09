@@ -164,7 +164,7 @@ class MediumStory():
             url_path = url_path.replace(char, "")
             
         # Build the filename and save the file
-        filename = "".join([self.pub_date, " ", url_path[:MAX_FILENAME_LENGTH], ".", format])
+        filename = "".join([self.pub_date, "-", url_path[:MAX_FILENAME_LENGTH], ".", format])
         with open(os.path.join(backup_dir, filename), "wt", encoding="utf8") as f:
             f.write(content)
         logging.info("Story \"{}\" downloaded to \"{}\".".format(self.title, filename))
