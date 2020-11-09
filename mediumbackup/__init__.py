@@ -94,6 +94,7 @@ class MediumStory():
             return self._markdown
         
         html = self.html()
+        
         # Add two new lines after figures and blockquotes 
         # to prevent formatting errors with markdown
         # https://github.com/matthewwithanm/python-markdownify/pull/25
@@ -113,6 +114,10 @@ class MediumStory():
         
         # Ensure that "```" stays on its own line
         md_story = md_story.replace("```", "\n```\n")
+        
+        # Remove leading whitspaces
+        # https://github.com/matthewwithanm/python-markdownify/issues/17
+        md_story = "\n".join([line.strip() for line in md_story.split("\n")])
         
         self._markdown = md_story
         return self._markdown
