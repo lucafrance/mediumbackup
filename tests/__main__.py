@@ -41,6 +41,18 @@ class MediumStoriesTest(unittest.TestCase):
         story.content = "<p>Dolor sit amet</p>"
         self.assertEqual(story.html(), "<h1>Lorem Ipsum</h1><p>Dolor sit amet</p>")
     
+    
+    def test_download_images(self):
+        story = dummy_medium_story()
+        backup_dir = os.path.join("tests", "backup")
+        images_dir = "images"
+        img_url = "http://www.python.org/static/community_logos/python-logo-master-v3-TM.png"
+        img_path = os.path.join(backup_dir, images_dir, "python-logo-master-v3-TM.png")
+        story.content = "<img src=\"{}\"></img>".format(img_url)
+        story.download_images(images_dir, backup_dir)
+        self.assertTrue(os.path.exists(img_path))
+        shutil.rmtree(backup_dir)
+        
         
 if __name__ == "__main__":
     unittest.main()
