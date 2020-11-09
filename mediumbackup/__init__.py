@@ -144,7 +144,7 @@ class MediumStory():
         if not os.path.exists(backup_dir):
             os.mkdir(backup_dir)
         
-        # Downloaf images if necessary
+        # Download images if necessary
         if download_images:
             images_dir = "images"
             self.download_images(images_dir, backup_dir)
