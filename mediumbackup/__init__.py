@@ -106,6 +106,9 @@ class MediumStory():
         # https://github.com/matthewwithanm/python-markdownify/pull/23
         html = html.replace("\n<li>", "<li>")
         
+        # Escape sequence for grave accent
+        html = html.replace("`", "\\`")
+        
         # Workaround for <pre> tags not being converted
         html = html.replace("<pre>", "<pre>```").replace("</pre>", "```</pre>")
         
