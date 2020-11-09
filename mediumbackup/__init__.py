@@ -42,11 +42,18 @@ class MediumStory():
         self._html = html
         return self._html
     
-    def download_images(self, images_dir, backup_dir):
-        """Download images and update the html to use the local images as source.
+    def download_images(self, images_dir, backup_dir="backup"):
+        """ Download images and update the html to use the local images as source.
+        
+        Keyword arguments:
+        images_dir      -- name of the directory where to save the images
+        backup_dir      -- directory where the images directory should be created, 
+                           paths will be adjusted releative to it, default "backup"
         """
         
         # If the folder doesn't exist yet, create it
+        if not os.path.isdir(backup_dir):
+            os.mkdir(os.path.join(backup_dir))
         if not os.path.isdir(os.path.join(backup_dir, images_dir)):
             os.mkdir(os.path.join(backup_dir, images_dir))
             
