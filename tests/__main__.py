@@ -28,7 +28,7 @@ class MediumStoriesTest(unittest.TestCase):
         for format in ("html", "md"):
             mb.backup_stories(username="lucafrance", backup_dir=test_backup_dir, format=format)
             file_extension = "." + format
-            reference_story_name = "2020-10-05 come-aggiungere-i-caratteri-ma"
+            reference_story_name = "2020-10-05-come-aggiungere-i-caratteri-ma"
             test_file = os.path.join(test_backup_dir, reference_story_name) + file_extension
             reference_file = os.path.join("tests", reference_story_name) + file_extension
             self.assertTrue(os.path.exists(test_file))
@@ -52,7 +52,7 @@ class MediumStoriesTest(unittest.TestCase):
         story.download_images(images_dir, backup_dir)
         self.assertTrue(os.path.exists(img_path))
         shutil.rmtree(backup_dir)
-        
-        
+    
+    
 if __name__ == "__main__":
     unittest.main()
