@@ -61,7 +61,6 @@ class MediumStory():
         soup = bs(html, "html.parser")
         for a in soup.find_all("a"):
             a_href = a["href"]
-            # print(a_href) 
             if a_href.startswith("https://medium.com/media/"):
                 r = requests.get(a_href, allow_redirects=True)
                 if not r.ok:
@@ -70,6 +69,16 @@ class MediumStory():
                     links_redirects.append((a_href, r.url))
         for medium_link, redirect_link in links_redirects:
             html = html.replace(medium_link, redirect_link)
+        
+        
+        # Replace gist links with embedding script
+        soup = bs(html, "html.parser")
+        for a in soup.find_all("a"):
+            a_href = a["href"]
+            if a_href == a.string and a_href.startswith("https://gist.github.com/"):
+                embedding_tag = soup.new_tag("script", src=a_href + ".js")
+                a.replace_with(embedding_tag)
+        html = str(soup)
         
         
         self._html = html
