@@ -52,6 +52,12 @@ class MediumStoriesTest(unittest.TestCase):
         story.download_images(images_dir, backup_dir)
         self.assertTrue(os.path.exists(img_path))
         shutil.rmtree(backup_dir)
+        
+    
+    def test_gist_embedding(self):
+        story = dummy_medium_story()
+        story.content = "<a href=\"https://medium.com/media/b32cf10831e25c6c315a79bfee55dc8e/href\">https://medium.com/media/b32cf10831e25c6c315a79bfee55dc8e/href</a>" 
+        self.assertTrue("<script src=\"https://gist.github.com/lucafrance/2a88f1e7a261292a8be63f8974ef1ca6.js\"></script>" in story.html())
     
     
 if __name__ == "__main__":
