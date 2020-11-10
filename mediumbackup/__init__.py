@@ -39,6 +39,22 @@ class MediumStory():
                 img.decompose()
         html = str(soup)    
         
+        # Embrace loose links in a paragraph, otherwise embedded content
+        # stays on the same line as the next paragraph and looks weird
+        # especially when converted to markdown. E.g.:
+        # <a href="https://medium.com/media/abcdef123456/href">
+        #    https://medium.com/media/abcdef123456/href
+        # </a><p>Lorem Ipsum [...] dolor sit amet.</p>
+        soup = bs(html, "html.parser")
+        links_to_replace = []
+        for a in soup.find_all("a"):
+            if a.parent.name == "[document]":
+                links_to_replace.append(str(a))
+        html = str(soup)    
+        for link in links_to_replace:
+            html = html.replace(link, "<p>{}</p>".format(link))
+        
+        
         self._html = html
         return self._html
     
