@@ -37,7 +37,7 @@ class MediumStory():
         for img in soup.find_all("img"):
             if img["src"].startswith("https://medium.com/_/stat"):
                 img.decompose()
-        html = str(soup)    
+        html = str(soup)  
         
         # Embrace loose links in a paragraph, otherwise embedded content
         # stays on the same line as the next paragraph and looks weird
@@ -53,6 +53,23 @@ class MediumStory():
         html = str(soup)    
         for link in links_to_replace:
             html = html.replace(link, "<p>{}</p>".format(link))
+        
+        # Check links starting with https://medium.com/media/, which are 
+        # probably embedded content and redirect to other websites. 
+        # If so, replace the url with the final one
+        links_redirects = []
+        soup = bs(html, "html.parser")
+        for a in soup.find_all("a"):
+            a_href = a["href"]
+            # print(a_href) 
+            if a_href.startswith("https://medium.com/media/"):
+                r = requests.get(a_href, allow_redirects=True)
+                if not r.ok:
+                    logging.warning("Could not resolve \"{}\", maybe the link is broken.".format(a_href))
+                if a_href != r.url:
+                    links_redirects.append((a_href, r.url))
+        for medium_link, redirect_link in links_redirects:
+            html = html.replace(medium_link, redirect_link)
         
         
         self._html = html
