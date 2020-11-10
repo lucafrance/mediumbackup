@@ -52,7 +52,13 @@ class MediumStoriesTest(unittest.TestCase):
         story.download_images(images_dir, backup_dir)
         self.assertTrue(os.path.exists(img_path))
         shutil.rmtree(backup_dir)
-        
+    
+    
+    def test_stat_image_removal(self):
+        story = dummy_medium_story()
+        story.content = "<img alt=\"\" height=\"1\" src=\"https://medium.com/_/stat?event=post.clientViewed&amp;referrerSource=full_rss&amp;postId=abcdef123456\" width=\"1\"/>"
+        self.assertFalse("https://medium.com/_" in story.html())
+    
     
     def test_gist_embedding(self):
         story = dummy_medium_story()
