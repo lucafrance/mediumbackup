@@ -84,20 +84,23 @@ class MediumStory():
         self._html = html
         return self._html
     
-    def download_images(self, images_dir, backup_dir="backup"):
+    def download_images(self, images_dir, images_src=None):
         """ Download images and update the html to use the local images as source.
         
         Keyword arguments:
-        images_dir      -- name of the directory where to save the images
-        backup_dir      -- directory where the images directory should be created, 
-                           paths will be adjusted releative to it, default "backup"
+        images_dir    -- the directory where the images should be saved
+                         e.g. /backup/images or /assets/images
+        images_src    -- the source parameter to be entered in html 
+                         e.g. /images
         """
         
+        # If images_src is missing, assume the directory
+        # Replace "\" with "/" for Windows
+        if images_src is None:
+            images_src = images_dir.replace("\\", "/")
+        
         # If the folder doesn't exist yet, create it
-        if not os.path.isdir(backup_dir):
-            os.mkdir(os.path.join(backup_dir))
-        if not os.path.isdir(os.path.join(backup_dir, images_dir)):
-            os.mkdir(os.path.join(backup_dir, images_dir))
+        os.makedirs(images_dir, exist_ok=True)
             
         # Parse the html source for all images
         html = self.html()
@@ -116,13 +119,13 @@ class MediumStory():
             r = requests.get(img_src)
                     
             # Save the image
-            file_path = os.path.join(backup_dir, images_dir, filename)
+            file_path = os.path.join(images_dir, filename)
             with open(file_path, "wb") as f:
                 f.write(r.content)
                 logging.info("Downloaded \"{}\" to \"{}\".".format(img_src, file_path))
                 
             #Replace src attributes to point to the downloaded image
-            new_src = "/".join((images_dir, filename))
+            new_src = "/".join((images_src, filename))
             html = html.replace("src=\"" + img_src  + "\"",
             "src=\"" + new_src + "\"")        
         
@@ -179,13 +182,14 @@ class MediumStory():
         self._markdown = md_story
         return self._markdown
         
-    def backup(self, backup_dir, format, download_images=False, jekyll_front_matter=False):
+    def backup(self, backup_dir, format, download_images=False, images_dir=None, jekyll_front_matter=False):
         """ Download the story locally.
         
         Keyword arguments:
         backup_dir          -- destination directory name, default "backup"
         format              -- "html" or "md" for markdown, default "html"
         download_images     -- True to download images and adjust the source, default False
+        images_dir          -- directory to save the images, if different from backup_dir/images 
         jekyll_front_matter -- Include jekyll front matter, only valid with markdown
         """
         
@@ -204,8 +208,12 @@ class MediumStory():
         
         # Download images if necessary
         if download_images:
-            images_dir = "images"
-            self.download_images(images_dir, backup_dir)
+            if images_dir is None:
+                images_dir = "/".join((backup_dir, "images"))
+                images_src = "images"
+            else:
+                images_src = None
+            self.download_images(images_dir=images_dir, images_src=images_src)
         
         # Get the content formatted correctly
         if format == "md":
@@ -232,6 +240,7 @@ class MediumStory():
 def backup_stories(username, backup_dir=DEFAULT_BACKUP_DIR, 
                    format=DEFAULT_FORMAT, 
                    download_images=False,
+                   images_dir=None,
                    jekyll_front_matter=False,
                    ):
     """ Download all public stories by username. """
@@ -244,7 +253,11 @@ def backup_stories(username, backup_dir=DEFAULT_BACKUP_DIR,
     # For each story, crate a backup file
     for story_raw in list_stories:
         story = MediumStory(story_raw)
-        story.backup(backup_dir, format, download_images, jekyll_front_matter)
+        story.backup(backup_dir, format=format, 
+                     download_images=download_images,
+                     images_dir=images_dir,
+                     jekyll_front_matter=jekyll_front_matter,
+                     )
         print("Downloaded Medium story: \"{}\"".format(story.title))
     
     return

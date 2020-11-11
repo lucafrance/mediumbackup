@@ -56,14 +56,13 @@ class MediumStoriesTest(unittest.TestCase):
     
     def test_download_images(self):
         story = dummy_medium_story()
-        backup_dir = os.path.join("tests", "backup")
-        images_dir = "images"
+        images_dir = os.path.join("tests", "images")
         img_url = "http://www.python.org/static/community_logos/python-logo-master-v3-TM.png"
-        img_path = os.path.join(backup_dir, images_dir, "python-logo-master-v3-TM.png")
         story.content = "<img src=\"{}\"></img>".format(img_url)
-        story.download_images(images_dir, backup_dir)
+        story.download_images(images_dir=images_dir)
+        img_path = os.path.join(images_dir, "python-logo-master-v3-TM.png")
         self.assertTrue(os.path.exists(img_path))
-        shutil.rmtree(backup_dir)
+        shutil.rmtree(images_dir)
     
     
     def test_stat_image_removal(self):
