@@ -198,7 +198,7 @@ class MediumStory():
         if format != "md" and jekyll_front_matter:
             logging.warning("Format {} cannot include a jekyll front matter. For that use markdown (\"md\") instead.".format(format))
         
-        # Create backup directroy if not existent
+        # Create backup directory if not existent
         if not os.path.exists(backup_dir):
             os.mkdir(backup_dir)
         
@@ -211,7 +211,7 @@ class MediumStory():
         if format == "md":
             content = self.markdown(jekyll_front_matter=jekyll_front_matter)
         else:
-            # html is the deault option
+            # html is the default option
             content = self.html()
         
         # Find the url path portion of the story url 
