@@ -29,7 +29,7 @@ class MediumStory():
             return self._html
         
         # Add story title to the content
-        html = "<h1>{}</h1>{}".format(self.title, self.content)
+        html = "<h2>{}</h2>{}".format(self.title, self.content)
         
         # Remove placeholder images for stats
         # They are used to count views from e.g. rss feeds
