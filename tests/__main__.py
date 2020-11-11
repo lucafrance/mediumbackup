@@ -66,5 +66,12 @@ class MediumStoriesTest(unittest.TestCase):
         self.assertTrue("<script src=\"https://gist.github.com/lucafrance/2a88f1e7a261292a8be63f8974ef1ca6.js\"></script>" in story.html())
     
     
+    def test_jekyll_front_matter(self):
+        story = dummy_medium_story()
+        story.title = "Lorem Ipsum"
+        story.link = "www.example.com"
+        self.assertTrue(story.markdown(jekyll_front_matter=True).startswith("---\ntitle: Lorem Ipsum\ncanonicalurl: www.example.com\n---\n\n"))
+    
+    
 if __name__ == "__main__":
     unittest.main()

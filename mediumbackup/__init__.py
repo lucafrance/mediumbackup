@@ -130,7 +130,12 @@ class MediumStory():
         self._html = html
         return
         
-    def markdown(self):
+    def markdown(self, jekyll_front_matter=False):
+        """ Return the content of the story in markdown.
+        
+        Keyword arguments:
+        jekyll_front_matter    -- include a front matter to use with jekyll 
+        """
         
         if self._markdown is not None:
             return self._markdown
@@ -164,16 +169,24 @@ class MediumStory():
         # https://github.com/matthewwithanm/python-markdownify/issues/17
         md_story = "\n".join([line.strip() for line in md_story.split("\n")])
         
+        # Add jekyll front matter
+        if jekyll_front_matter:
+            front_matter = "---\ntitle: {}\ncanonicalurl: {}\n---\n\n".format(
+                self.title, self.link
+            )
+            md_story = front_matter + md_story
+            
         self._markdown = md_story
         return self._markdown
         
-    def backup(self, backup_dir, format, download_images=False):
+    def backup(self, backup_dir, format, download_images=False, jekyll_front_matter=False):
         """ Download the story locally.
         
         Keyword arguments:
-        backup_dir      -- destination directory name, default "backup"
-        format          -- "html" or "md" for markdown, default "html"
-        download_images -- True to download images and adjust the source, default False
+        backup_dir          -- destination directory name, default "backup"
+        format              -- "html" or "md" for markdown, default "html"
+        download_images     -- True to download images and adjust the source, default False
+        jekyll_front_matter -- Include jekyll front matter, only valid with markdown
         """
         
         logging.info("Downloading story \"{}\" published on \"{}\".".format(self.title, self.pub_date))
@@ -181,6 +194,9 @@ class MediumStory():
         # Check user input
         if format not in ["html", "md"]:
             logging.warning("Format {} not recognized, html will be used instead.".format(format))
+        
+        if format != "md" and jekyll_front_matter:
+            logging.warning("Format {} cannot include a jekyll front matter. For that use markdown (\"md\") instead.".format(format))
         
         # Create backup directroy if not existent
         if not os.path.exists(backup_dir):
@@ -193,7 +209,7 @@ class MediumStory():
         
         # Get the content formatted correctly
         if format == "md":
-            content = self.markdown()
+            content = self.markdown(jekyll_front_matter=jekyll_front_matter)
         else:
             # html is the deault option
             content = self.html()
@@ -213,7 +229,11 @@ class MediumStory():
         
         return
         
-def backup_stories(username, backup_dir=DEFAULT_BACKUP_DIR, format=DEFAULT_FORMAT, download_images=False):
+def backup_stories(username, backup_dir=DEFAULT_BACKUP_DIR, 
+                   format=DEFAULT_FORMAT, 
+                   download_images=False,
+                   jekyll_front_matter=False,
+                   ):
     """ Download all public stories by username. """
     
     # Get the stories list through a medium client, 
@@ -224,7 +244,7 @@ def backup_stories(username, backup_dir=DEFAULT_BACKUP_DIR, format=DEFAULT_FORMA
     # For each story, crate a backup file
     for story_raw in list_stories:
         story = MediumStory(story_raw)
-        story.backup(backup_dir, format, download_images)
+        story.backup(backup_dir, format, download_images, jekyll_front_matter)
     
     return
     

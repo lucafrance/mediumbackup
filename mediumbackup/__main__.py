@@ -21,11 +21,17 @@ if __name__ == "__main__":
                         help="Download images locally",
                         )
     parser.set_defaults(download_images=False)
+    parser.add_argument("--jekyll_front_matter", "--jfm", 
+                        action="store_true", 
+                        help="Include jekyll front matter if markdown",
+                        )
+    parser.set_defaults(jekyll_front_matter=False)
     
     arguments = parser.parse_args()
     mb.backup_stories(
         arguments.username, backup_dir=arguments.backup_dir, 
         format=arguments.format, download_images=arguments.download_images,
+        jekyll_front_matter=arguments.jekyll_front_matter,
         )
     
     
