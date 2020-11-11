@@ -18,7 +18,7 @@ class MediumStory():
         self.raw = raw
         self.pub_date = raw["pubDate"][:len("yyyy-mm-dd")]
         self.title = raw["title"]
-        self.link = raw["link"]
+        self.link = raw["link"].split("?")[0]
         self.content = raw["content"]
         self._html = None
         self._markdown = None

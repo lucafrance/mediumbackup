@@ -23,6 +23,18 @@ def dummy_medium_story():
 
 class MediumStoriesTest(unittest.TestCase):
     
+    def test_stripped_link(self):
+        links = [
+            "https://medium.com/@johndoe/some-title-abc123",
+            "https://medium.com/@johndoe/some-title-abc123?source=rss-abc123",
+        ]
+        for link in links:
+            story = dummy_medium_story()
+            story.raw["link"] = link
+            story = mb.MediumStory(story.raw)
+            self.assertEqual(links[0], story.link)
+            
+    
     def test_backup_stories_wo_images(self):
         test_backup_dir = os.path.join("tests","backup")
         for format in ("html", "md"):
