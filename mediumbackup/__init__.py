@@ -245,6 +245,7 @@ def backup_stories(username, backup_dir=DEFAULT_BACKUP_DIR,
     for story_raw in list_stories:
         story = MediumStory(story_raw)
         story.backup(backup_dir, format, download_images, jekyll_front_matter)
+        print("Downloaded Medium story: \"{}\"".format(story.title))
     
     return
     
