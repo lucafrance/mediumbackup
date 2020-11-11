@@ -39,7 +39,7 @@ class MediumStoriesTest(unittest.TestCase):
         story = dummy_medium_story()
         story.title = "Lorem Ipsum"
         story.content = "<p>Dolor sit amet</p>"
-        self.assertEqual(story.html(), "<h2>Lorem Ipsum</h2><p>Dolor sit amet</p>")
+        self.assertEqual(story.html(), "<h3>Lorem Ipsum</h3><p>Dolor sit amet</p>")
     
     
     def test_download_images(self):
