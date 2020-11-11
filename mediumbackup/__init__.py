@@ -39,7 +39,7 @@ class MediumStory():
                 img.decompose()
         html = str(soup)  
         
-        # Embrace loose links in a paragraph, otherwise embedded content
+        # Embrace loose links in a figure, otherwise embedded content
         # stays on the same line as the next paragraph and looks weird
         # especially when converted to markdown. E.g.:
         # <a href="https://medium.com/media/abcdef123456/href">
@@ -52,7 +52,7 @@ class MediumStory():
                 links_to_replace.append(str(a))
         html = str(soup)    
         for link in links_to_replace:
-            html = html.replace(link, "<p>{}</p>".format(link))
+            html = html.replace(link, "<figure>{}</figure>".format(link))
         
         # Check links starting with https://medium.com/media/, which are 
         # probably embedded content and redirect to other websites. 
