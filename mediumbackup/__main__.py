@@ -8,20 +8,20 @@ if __name__ == "__main__":
     parser.add_argument("username",
                         help="A Medium username",
                         )
-    parser.add_argument("--backup_dir", "--bd", 
+    parser.add_argument("--backup_dir", "-bd", 
                         default=mb.DEFAULT_BACKUP_DIR,
                         help="destination directory name",
                         )
-    parser.add_argument("--format", "--f", 
+    parser.add_argument("--format", "-f", 
                         default=mb.DEFAULT_FORMAT,
                         help="\"html\" or \"md\" for markdown",
                         )
-    parser.add_argument("--download_images", "--i", 
+    parser.add_argument("--download_images", "-i", 
                         action="store_true", 
                         help="Download images locally",
                         )
     parser.set_defaults(download_images=False)
-    parser.add_argument("--jekyll_front_matter", "--jfm", 
+    parser.add_argument("--jekyll_front_matter", "-jfm", 
                         action="store_true", 
                         help="Include jekyll front matter if markdown",
                         )
