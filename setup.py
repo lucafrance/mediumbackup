@@ -5,7 +5,7 @@ with open("README.md", "rt") as f:
 
 setuptools.setup(
     name="mediumbackup", 
-    version="1.0.0",
+    version="1.1.0",
     author="Luca Franceschini",
     author_email="luca.france@outlook.com",
     description="Backup your Medium Stories.",
@@ -20,6 +20,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.8",
-    install_requires=["python-medium", "markdownify"],
+    install_requires=["python-medium", "markdownify", "beautifulsoup4", "requests"],
     keyworks=["medium", "backup", "api"]
 )
