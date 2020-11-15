@@ -81,7 +81,12 @@ class MediumStoriesTest(unittest.TestCase):
         story = dummy_medium_story()
         story.title = "Lorem Ipsum"
         story.link = "www.example.com"
-        self.assertTrue(story.markdown(jekyll_front_matter=True).startswith("---\ntitle: Lorem Ipsum\ncanonicalurl: www.example.com\n---\n\n"))
+        story.content = "<p>Dolor sit amet.</p>"
+        md_story = story.markdown(jekyll_front_matter=True)
+        # Check that the front matter is there and complete
+        self.assertTrue(md_story.startswith("---\ntitle: Lorem Ipsum\ncanonicalurl: www.example.com\n---\n\n"))
+        # Check that the markdown portion starts with the content and no longer the title
+        self.assertTrue(md_story.split(sep="---\n", maxsplit=2)[2].lstrip().startswith("Dolor sit amet."))
     
     
 if __name__ == "__main__":

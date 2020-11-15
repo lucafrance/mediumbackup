@@ -137,13 +137,20 @@ class MediumStory():
         """ Return the content of the story in markdown.
         
         Keyword arguments:
-        jekyll_front_matter    -- include a front matter to use with jekyll 
+        jekyll_front_matter    -- include a front matter to use with jekyll
+                                  if True, the title of the story is only 
+                                  included in the front matter
         """
         
         if self._markdown is not None:
             return self._markdown
         
         html = self.html()
+        
+        # If there is a front matter, it includes the title, so the first
+        # h3 header with the title is no longer needed
+        if jekyll_front_matter:
+            html = html.partition("</h3>")[2]
         
         # Add two new lines after figures and blockquotes 
         # to prevent formatting errors with markdown
