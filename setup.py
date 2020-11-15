@@ -5,7 +5,7 @@ with open("README.md", "rt") as f:
 
 setuptools.setup(
     name="mediumbackup", 
-    version="1.1.0",
+    version="1.1.1",
     author="Luca Franceschini",
     author_email="luca.france@outlook.com",
     description="Backup your Medium Stories.",
