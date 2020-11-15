@@ -169,8 +169,18 @@ class MediumStory():
         # Workaround for <pre> tags not being converted
         html = html.replace("<pre>", "<pre>```").replace("</pre>", "```</pre>")
         
+        # Script tags are destroyed by markdownify, add a space to prevent it.
+        # The space is removed after the conversion to markdown
+        html = html.replace("<script ", " < script ")
+        html = html.replace("</script>", " < /script>")
+        
         # Convert to markdown
         md_story = md(html, heading_style="ATX")
+        
+        # Remove the space added previously to prevent the script tag 
+        # from being deleted
+        md_story = md_story.replace("< script ", " <script ")
+        md_story = md_story.replace("< /script>", " </script>")
         
         # Ensure that "```" stays on its own line
         md_story = md_story.replace("```", "\n```\n")

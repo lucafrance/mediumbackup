@@ -89,5 +89,12 @@ class MediumStoriesTest(unittest.TestCase):
         self.assertTrue(md_story.split(sep="---\n", maxsplit=2)[2].lstrip().startswith("Dolor sit amet."))
     
     
+    def test_script_tag_in_mardown(self):
+        story = dummy_medium_story()
+        script_html = "<script src=\"www.example.com\"></script>"
+        story.content = script_html
+        self.assertTrue(script_html in story.markdown().strip().replace(">  <", "><"))
+    
+    
 if __name__ == "__main__":
     unittest.main()
